@@ -26,7 +26,6 @@ using std::vector;
 #define TAG_COLON 273			// :
 #define TAG_COMMA 274			// ,
 #define TAG_SINGLEQUOTE 275		// '
-#define TAG_SEMICOLON 276		// ;
 #define TAG_VAR 277
 #define TAG_ARRAY 278
 #define TAG_OF 279
@@ -120,15 +119,13 @@ void getCate(){
 	cate = lex[symNumber].cate;
 	symNumber++;
 }
-void Exper(){
+void Experiment(){
 }
 void Statement(){
 }
 void CompoundStatement(){
 	VarDeclar();
 	ConstDeclar();
-}
-void Function(){
 }
 void FormalParamList(){
 	if(cate == TAG_VAR){
@@ -196,7 +193,53 @@ void ProdureHead(){
 void Produre(){
 	ProdureHead();
 	CompoundStatement();
-	while(cate != TAG_SEMICOLON){
+	while(cate == TAG_PRODURE){
+		ProdureHead();
+		CompoundStatement();
+	}
+}
+
+void FunctionHead(){
+	while(cate == TAG_FUNC){
+		getCate();
+		if(cate == TAG_ID){
+			getCate();
+			if(cate == TAG_LPARENT){
+				getCate();
+				FormalParamList();
+			} else {
+				error("not (");
+			}
+			if(cate != TAG_RPARENT){
+				error("");
+			}
+			getCate();
+			if(cate != TAG_COLON){
+				error("");
+			}
+			getCate();
+			if(cate == TAG_INT){
+
+			} else if(cate == TAG_REAL){
+
+			} else if(cate == TAG_CHAR){
+
+			} else{
+				error("");
+			}
+			getCate();
+			if(cate != TAG_SEMICOLON){
+				error("");
+			}
+		} else {
+			error("not ID");
+		}
+	}
+}
+void Function(){
+	FunctionHead();
+	CompoundStatement();
+	while(cate == TAG_FUNC){
 		ProdureHead();
 		CompoundStatement();
 	}
