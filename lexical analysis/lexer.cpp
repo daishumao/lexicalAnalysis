@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include <stdlib.h>
+#include <math.h>
 using namespace std;
 
 #define TAG_ADD 256				// +
@@ -24,7 +25,6 @@ using namespace std;
 #define TAG_COLON 273			// :
 #define TAG_COMMA 274			// ,
 #define TAG_SINGLEQUOTE 275		// '
-#define TAG_SEMICOLON 276		// ;
 #define TAG_VAR 277
 #define TAG_ARRAY 278
 #define TAG_OF 279
@@ -60,22 +60,32 @@ using namespace std;
 #define TAG_ASSIGN 309			// [
 #define TAG_TYPESTRING 310
 
+struct syms
+{
+	int ints;
+	string content;
+	char chars;
+	string strings;
+	double reals;
+};
 struct lexer
 {
 	int cate;
-	string sym;
+	syms sym;
+	int lineno;
 };
+
 string symName[]={"const","integer","real","char","var","array","of",
 	"if","then","else","do","while","for","to","by","procedure",
 	"function","read","write","begin","end"};
 int categoryName[]={TAG_CONST,TAG_INT,TAG_REAL,TAG_CHAR,TAG_VAR,TAG_ARRAY,TAG_OF,
 	TAG_IF,TAG_THEN,TAG_ELSE,TAG_DO,TAG_WHILE,TAG_FOR,TAG_TO,TAG_BY,TAG_PRODURE,
 	TAG_FUNC,TAG_READ,TAG_WRITE,TAG_BEGIN,TAG_END};
-int symNumber = 0;
 int typeNumber = 23;
 ifstream input;
 ofstream output;
 string w = "";
+char wc;
 double number = 0;
 char ch = ' ';
 string pLine;
@@ -83,7 +93,14 @@ string filename;
 int isEnd = 0;
 lexer lex[5000];
 int cate;
-
+int sym;
+int lineno;
+int ints;
+double reals;
+int lineNo = 1;
+string id;
+char chars;
+string strings;
 void getch(){
 	if (input.peek() != EOF){
 		ch = input.get();
@@ -91,8 +108,7 @@ void getch(){
 		printf("program incomlete");
 	}
 }
-void error(string errorInfo){
-	cout << errorInfo << endl;
+void error(int no){
 	input.close();
 	output.close();
 }
@@ -111,75 +127,21 @@ int isalpha(char c)
 	else
 		return false;
 }
-
-void getCate(){
-	cate = lex[symNumber].cate;
-	symNumber++;
-}
-void Exper(){
-}
-void Statement(){
-}
-void CompoundStatement(){
-}
-void Function(){
-}
-void FormalParamList(){
-	if(cate == TAG_VAR){
-		getCate();
-		if(cate == TAG_ID){
-		} else {
-			error("not ID")
-		}
-	} else {
-		error("not VAR");
-	}
-}
-void Produre(){
-	while(cate == TAG_PRODURE){
-		getCate();
-		if(cate == TAG_ID){
-			getCate();
-			if(cate == TAG_LPARENT){
-				getCate();
-				FormalParamList();
-			} else {
-				error("not (");
-			}
-		} else {
-			error("not ID");
+string idUp(string id){
+	for(int i = 0;i< id.size();i++){
+		if(id[i] >= 'a' && id[i]<= 'z'){
+			id[i] += ('A' - 'a');
 		}
 	}
+	return id;
 }
-void ConstDeclar(){
-}
-void VarDeclar(){
-}
-void Block(){
-	ConstDeclar();
-	VarDeclar();
-	if(cate == TAG_PRODURE){
-		Produre();
-	} else if(cate == TAG_FUNC){
-		Function();
-	}
-	CompoundStatement();
-}
-void Program(){
-	getCate();
-	Block();
-	if(cate != TAG_PERIOD){
-		error("");
-	}else{
-	}
-}
-
-
 void GetSym(){
 	w="";
 	int i;
 	getch();
 	while( ch == ' ' || ch == '\n'){
+		if(ch == '\n')
+			lineNo++;
 		getch();
 	}
 	if (isalpha(ch)){
@@ -196,14 +158,12 @@ void GetSym(){
 			}
 		}
 		if (i < typeNumber){
-			lex[symNumber].sym = symName[i];
-			lex[symNumber].cate = categoryName[i];
+			sym = categoryName[i];
 		} else {
-			lex[symNumber].sym = w;
-			lex[symNumber].cate = TAG_ID;
+			sym = TAG_ID;
+			id = idUp(w);
 		}
-		symNumber++;
-		
+
 	} else if(isdigit(ch)){
 		number = 0;
 		while(isdigit(ch)){
@@ -217,127 +177,82 @@ void GetSym(){
 				getch();
 				j++;
 			}
-			lex[symNumber].sym = "real";
-			lex[symNumber].cate = TAG_REAL;
+			reals = number;
+			sym = TAG_TYPEREAL;
 			input.seekg(-1,ios::cur);
-			symNumber++;
 		}else{
-			lex[symNumber].sym = "int";
-			lex[symNumber].cate = TAG_INT;
+			ints = number;
+			sym = TAG_TYPEINT;
 			input.seekg(-1,ios::cur);
-			symNumber++;
 		}
-	} else if(ch == '+') {
-		lex[symNumber].sym = "+";
-		lex[symNumber].cate = TAG_ADD;
-		symNumber++;
-	} else if(ch == '-') {
-		lex[symNumber].sym = "-";
-		lex[symNumber].cate = TAG_SUB;
-		symNumber++;
-	} else if(ch == '*') {
-		lex[symNumber].sym = "*";
-		lex[symNumber].cate = TAG_MUL;
-		symNumber++;
-	} else if(ch == '/') {
-		lex[symNumber].sym = "/";
-		lex[symNumber].cate = TAG_DIV;
-		symNumber++;
-	} else if(ch == '.') {
-		lex[symNumber].sym = ".";
-		lex[symNumber].cate = TAG_PERIOD;
+	} else if(ch == '+'){
+		sym = TAG_ADD;
+	} else if(ch == '-'){
+		sym = TAG_SUB;
+	} else if(ch == '*'){
+		sym = TAG_MUL;
+	} else if(ch == '/'){
+		sym = TAG_DIV;
+	} else if(ch == '.'){
+		sym = TAG_PERIOD;
 		isEnd = 1;
 		return;
-		symNumber++;
-	} else if(ch == '(') {
-		lex[symNumber].sym = "(";
-		lex[symNumber].cate = TAG_LPARENT;
-		symNumber++;
+	} else if(ch == '('){
+		sym = TAG_LPARENT;
 	} else if(ch == ')') {
-		lex[symNumber].sym = ")";
-		lex[symNumber].cate = TAG_RPARENT;
-		symNumber++;
+		sym = TAG_RPARENT;
 	} else if(ch == '[') {
-		lex[symNumber].sym = "[";
-		lex[symNumber].cate = TAG_LBRACKET;
-		symNumber++;
+		sym = TAG_LBRACKET;
 	} else if(ch == ']') {
-		lex[symNumber].sym = "]";
-		lex[symNumber].cate = TAG_RBRACKET;
-		symNumber++;
+		sym = TAG_RBRACKET;
 	} else if(ch == '{') {
-		lex[symNumber].sym = "{";
-		lex[symNumber].cate = TAG_LBRACE;
-		symNumber++;
+		sym = TAG_LBRACE;
 	} else if(ch == '}') {
-		lex[symNumber].sym = "}";
-		lex[symNumber].cate = TAG_RBRACE;
-		symNumber++;
+		sym = TAG_RBRACE;
 	} else if(ch == ';') {
-		lex[symNumber].sym = ";";
-		lex[symNumber].cate = TAG_SEMICOLON;
-		symNumber++;
+		sym = TAG_SEMICOLON;
 	} else if(ch == ',') {
-		lex[symNumber].sym = ",";
-		lex[symNumber].cate = TAG_COMMA;
-		symNumber++;
+		sym = TAG_COMMA;
 	} else if(ch == '=') {
-		lex[symNumber].sym = "=";
-		lex[symNumber].cate = TAG_ASSIGN;
-		symNumber++;
+		sym = TAG_ASSIGN;
 	} else if(ch == '<') {
 		getch();
 		if(ch == '='){
-			lex[symNumber].sym = "<=";
-			lex[symNumber].cate = TAG_LE;
-			symNumber++;
+			sym = TAG_LE;
 		} else if( ch == '>') {
-			lex[symNumber].sym = "<>";
-			lex[symNumber].cate = TAG_NEQ;
-			symNumber++;
+			sym = TAG_NEQ;
 		} else {
-			lex[symNumber].sym = "<";
-			lex[symNumber].cate = TAG_SMALLER;
-			symNumber++;
+			sym = TAG_SMALLER;
 			input.seekg(-1,ios::cur);
 		}
 	} else if(ch == '>') {
 		getch();
 		if(ch == '='){
-			lex[symNumber].sym = ">=";
-			lex[symNumber].cate = TAG_GE;
-			symNumber++;
+			sym = TAG_GE;
 		} else {
-			lex[symNumber].sym = ">";
-			lex[symNumber].cate = TAG_GREATER;
-			symNumber++;
+			sym = TAG_GREATER;
 			input.seekg(-1,ios::cur);
 		}
 	} else if(ch == ':') {
 		getch();
 		if(ch == '='){
-			lex[symNumber].sym = ":=";
-			lex[symNumber].cate = TAG_ASSIGN;
-			symNumber++;
+			sym = TAG_ASSIGN;
 		} else {
-			lex[symNumber].sym = "=";
-			lex[symNumber].cate = TAG_SEMICN;
-			symNumber++;
+			sym = TAG_SEMICN;
 			input.seekg(-1,ios::cur);
 		}
 	} else if(ch == '\''){
 		getch();
 		if(!isdigit(ch) && !isalpha(ch)){
-			error("Character analysis error");
+			error(1);
 		}
-		w = ch;
+		wc = ch;
 		getch();
 		if(ch != '\''){
-			error("Character analysis error");
+			error(2);
 		}
-		lex[symNumber].sym = w;
-		lex[symNumber].cate = TAG_TYPECHAR;
-		symNumber++;
+		chars = wc;
+		sym = TAG_TYPECHAR;
 	} else if(ch == '"'){
 		getch();
 		while(int(ch) == 32 || int(ch) == 33 || (int(ch) >= 35 && int(ch) <= 126)){
@@ -349,11 +264,10 @@ void GetSym(){
 			}
 		}
 		if (ch != '"'){
-			error("String analysis error");
+			error(3);
 		}
-		lex[symNumber].sym = w;
-		lex[symNumber].cate = TAG_TYPESTRING;
-		symNumber++;
+		strings = w;
+		sym = TAG_TYPESTRING;
 	}
 }
 int main(){
