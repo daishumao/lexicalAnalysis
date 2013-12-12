@@ -1,0 +1,35 @@
+const a=45, b=27;
+var x,y,g,m:integer;
+i:real;
+rd1:integer;
+rd2:real;
+rd3:char;
+procedure swap();
+var temp:integer;
+begin
+	temp := x;
+	x:= y;
+	y:= temp
+end;
+procedure mod();
+begin
+	x:=x-x/y*y
+end;
+begin
+	x:=a;
+	y:=b;
+	mod();
+	while x<>0 do
+	begin
+		swap();
+		mod()
+	end;
+	g:=y;
+	m:=a*b/g;
+	write(g);
+	write(m);
+	read(rd3,rd2,rd1);	
+	write(rd3);
+	write(rd2);
+	write(rd1)
+end.

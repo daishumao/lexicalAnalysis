@@ -1,0 +1,8 @@
+const a=45, b=27;
+var x,y,g,m:integer;
+begin
+	x:=a;
+	y:=b;
+	x:=a+b;
+	write(x);
+end.

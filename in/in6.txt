@@ -1,0 +1,10 @@
+function fab(n:integer):integer;
+begin
+	if n <= 2 then
+		fab:=1
+	else
+		fab:= fab(n-1) + fab(n-2)
+end;
+begin
+write(fab(8))
+end.

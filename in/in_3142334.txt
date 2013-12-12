@@ -1,0 +1,32 @@
+var a:integer;
+function b(c:integer) : integer;
+    var a,z:integer;
+    function d(e:integer):integer;
+        var a:integer;
+        function f(g:integer):integer;
+            var a:integer;
+            begin
+                a:=1;
+                f:=b(-1);
+                write(a);
+                write(z)
+            end;
+        begin
+            a:=2;
+            d:=f(e);
+            write(a)
+        end;
+    begin
+        a:=3;z:=4;        
+        if c=-1 then
+            b:=a
+        else
+            b:=d(c);
+        write(a)
+    end;
+
+begin
+    a:=4;
+    write(b(10));
+    write(a)
+end.

@@ -1,0 +1,24 @@
+var a,b,x,y:integer;
+procedure swap(var fArg1, fArg2:integer; fArg3,fArg4:integer);
+var c,d:integer;
+begin
+	c := fArg1;
+	fArg1 := fArg2;
+	fArg2 := c;
+	d := fArg3;
+	fArg3 := fArg4;
+	fArg4 := d
+end;
+begin
+	a := 10;
+	b := 20;
+	swap(a,b,1,2);
+	write(a);
+	write(b);
+	swap(x,y,a,b);
+	write(a);
+	write(b);
+	swap(a,b,1,2);
+	write(a);
+	write(b)
+end.

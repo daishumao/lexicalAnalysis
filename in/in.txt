@@ -1,0 +1,42 @@
+const n=6;
+var p:integer;
+i:integer;
+
+procedure init();
+begin
+    p:=2
+end;
+procedure mod(var a,i:integer);
+    a:=a-a/i*i;
+function getprime() : integer;
+    function isprime(a:integer): integer;
+    var i:integer;
+    begin
+        isprime := 1;
+        i:= 2;
+        while i<a do
+        begin
+        	mod(a,i);
+            if a=0 then
+            begin
+                isprime := 0
+            end;
+            i:=i+1;
+        end;
+    end;
+begin
+    getprime:=p;
+    p:=p+1;
+    while isprime(p) = 0 do
+        p:=p+1
+end;
+
+begin
+    i:=1;
+    init();
+    while i <= n do
+    begin
+        write(getprime());
+        i:=i+1
+    end
+end.
