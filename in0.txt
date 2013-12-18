@@ -1,29 +1,43 @@
-var x,y:integer;
-a:array[6] of real;
-flag:integer;
-procedure test(var i:integer;a:integer);
+const n=6;
+var p:integer;
+i:integer;
+
+procedure init();
 begin
-	for i := 1 to 10 by 1 do
-		write("22");
+    p:=2
 end;
-function swap(var fArg1, fArg2:real; fArg3,fArg4:integer):integer;
-var d:integer;c:real;
+procedure mod(var a,i:integer);
 begin
-	c := fArg1;
-	fArg1 := fArg2;
-	fArg2 := c;
-	d := fArg3;
-	fArg3 := fArg4;
-	fArg4 := d
+    a:=a-a/i*i
 end;
+function getprime() : integer;
+    function isprime(a:integer): integer;
+    var i:integer;
+    begin
+        isprime := 1;
+        i:= 2;
+        while i<a do
+        begin
+        	mod(a,i);
+            if a=0 then
+            begin
+                isprime := 0
+            end
+        end;
+    end;
 begin
-	a[3] := 10.5;
-	a[4] := 20.7;
-	y:=111;
-	flag:=swap(a[3],a[4],1,2);
-	write(a[3]);
-	write(a[4]);
-	test(x,y);
-	write(x);
-	write(y)
+    getprime:=p;
+    p:=p+1;
+    while isprime(p) = 0 do
+        p:=p+1
+end;
+
+begin
+    i:=1;
+    init();
+    while i <= n do
+    begin
+        write(getprime());
+        i:=i+1
+    end
 end.

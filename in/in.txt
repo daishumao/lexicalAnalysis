@@ -7,7 +7,9 @@ begin
     p:=2
 end;
 procedure mod(var a,i:integer);
-    a:=a-a/i*i;
+begin
+    a:=a-a/i*i
+end
 function getprime() : integer;
     function isprime(a:integer): integer;
     var i:integer;
